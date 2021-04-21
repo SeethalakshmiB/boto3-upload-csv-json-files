@@ -49,15 +49,17 @@
             deleteDir()
             checkout scm
 
-            junit 'demo.xml'
-            // publishHTML (target : [allowMissing: false,
-            // alwaysLinkToLastBuild: true,
-            // keepAll: true,
-            // reportDir: 'build',
-            // reportFiles: 'report.html',
-            // reportName: 'My Reports',
-            // reportTitles: 'The Report'])
-                        // }
+            ./gradlew clean resultGenerator
+
+            // junit 'demo.xml'
+            publishHTML (target : [allowMissing: false,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'build',
+            reportFiles: 'report.html',
+            reportName: 'My Reports',
+            reportTitles: 'The Report'])
+                        }
             //enable for commit id in build number
             //env.git_commit_id = sh returnStdout: true, script: 'git rev-parse HEAD'
             //env.git_commit_id_short = env.git_commit_id.take(7)
