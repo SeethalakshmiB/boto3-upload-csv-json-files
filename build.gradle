@@ -1,0 +1,188 @@
+import groovy.xml.MarkupBuilder
+
+plugins {
+    id 'base'
+}
+
+group 'gradleReporterDemo'
+version '1.0-SNAPSHOT'
+
+def buildDirExist() {
+    File buildDir = file("${project.buildDir}")
+    if (!buildDir.exists()) {
+        buildDir.mkdirs()
+    }
+
+    copy {
+        from "${project.projectDir}/css"
+        into "${project.buildDir}/css"
+    }
+}
+
+task htmlReport {
+    doFirst {
+        buildDirExist()
+    }
+    doLast {
+        def xmlFile = new XmlParser().parse(new File("demo.xml"))
+        def xmlWriter = new FileWriter(file("${project.buildDir}/index.html"))
+        def xmlMarkup = new MarkupBuilder(xmlWriter)
+        xmlWriter.write("<!DOCTYPE html>\n")
+        xmlMarkup.html() {
+            head() {
+                meta(charset: "utf-8")
+                meta(name: "viewport", content:"width=device-width, initial-scale=1, maximum-scale=1")
+                title("Test Report")
+                link(rel: "stylesheet", href: "./css/main.css") { mkp.yield("") }
+                link(rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css", media: "screen,projection") { mkp.yield("") }
+                link(rel: "stylesheet", href: "https://fonts.googleapis.com/icon?family=Material+Icons") { mkp.yield("") }
+            }
+            body(){
+                header(){
+                    div("class":"nav-wrapper"){
+                        nav(class: "blue darken-3") {
+                            a(class: "brand-logo", href: "#",id: "logo-container") {
+                                img(class: "logo-img",src: "") {
+                                    mkp.yield("")
+                                }
+                            }
+                            a("href":"index.html") {
+                                ul(class: "center flow-text", "TEST RESULTS")
+                            }
+                        }
+                    }
+                }
+                main() {
+                    div(class: "container") {
+                        div(style: "margin-bottom: 50px;") {
+                            table(class: "striped responsive-table", id: "example") {
+                                thead() {
+                                    tr() {
+                                        th(class: "center","Test Suite")
+                                        th(class: "center","Passed")
+                                        th(class: "center","Failed")
+                                        th(class: "center","Total")
+                                    }
+                                }
+                                tbody() {
+                                    xmlFile.testsuite.each { testsuite ->
+                                        tr() {
+                                            td(class: "center",) {
+                                                a(href: "report.html",testsuite['@name'])
+                                            }
+                                            td(class: "center",Integer.valueOf(Integer.valueOf(testsuite['@tests']) - Integer.valueOf(testsuite['@failure'])))
+                                            td(class: "center",testsuite['@failure'])
+                                            td(class: "center",testsuite['@tests'])
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            footer(class: "page-footer blue darken-3") {
+                div(class: "footer-copyright") {
+                    div(class: "container", "Demo By - rookieInTraining") {
+                        a(class: "grey-text text-lighten-4 right", "")
+                    }
+                }
+            }
+            script(type: "text/javascript", src: "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js") { mkp.yield("") }
+        }
+    }
+}
+
+task resultGenerator() {
+    doFirst {
+        buildDirExist()
+    }
+
+    doLast {
+        def xmlFile = new XmlParser().parse(new File("demo.xml"))
+        def xmlWriter = new FileWriter(file("${project.buildDir}/report.html"))
+        def xmlMarkup = new MarkupBuilder(xmlWriter)
+        xmlWriter.write("<!DOCTYPE html>\n")
+        xmlMarkup.html() {
+            head() {
+                meta(charset: "utf-8")
+                meta(name: "viewport", content:"width=device-width, initial-scale=1, maximum-scale=1")
+                title("Test Report")
+                link(rel: "stylesheet", href: "./css/main.css") { mkp.yield("") }
+                link(rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css", media: "screen,projection") { mkp.yield("") }
+                link(rel: "stylesheet", href: "https://fonts.googleapis.com/icon?family=Material+Icons") { mkp.yield("") }
+            }
+            body(){
+                header(){
+                    div("class":"nav-wrapper"){
+                        nav(class: "blue darken-3") {
+                            a(class: "brand-logo", href: "#",id: "logo-container") {
+                                img(class: "logo-img",src: "") {
+                                    mkp.yield("")
+                                }
+                            }
+                            a("href":"index.html") {
+                                ul(class: "center flow-text", "TEST RESULTS")
+                            }
+                        }
+                    }
+                }
+                main() {
+                    div("class":"container") {
+                        xmlFile.testsuite.each { testsuite ->
+                            h2("Suite Name : " + testsuite['@name'])
+                            h5("Total Tests Executed : " + testsuite['@tests'])
+                            h5("Total Tests Failed : " + testsuite['@failure'])
+                            h5("Date : " + testsuite['@timestamp'])
+                            div(style: "margin-bottom: 50px;") {
+                                table(class: "striped highlight responsive-table") {
+                                    thead() {
+                                        tr() {
+                                            th(class: "center","Test Name")
+                                            th(class: "center","Result")
+                                            th(class: "center","Failure Reason")
+                                            th(class: "center","Test URL")
+                                        }
+                                    }
+                                    tbody() {
+                                        testsuite.testcase.each { testcase ->
+                                            if(testcase.failure.size() <= 0) {
+                                                tr(class: "green lighten-5") {
+                                                    td(class: "center",testcase['@name'])
+                                                    td(class: "center","Passed")
+                                                    td("")
+                                                    td(class: "center") {
+                                                        a(href: "#", testcase.'system-out'.text())
+                                                    }
+                                                }
+                                            } else {
+                                                tr(class: "red lighten-5") {
+                                                    td(class: "center",testcase['@name'])
+                                                    td(class: "center", "Failed")
+                                                    td(class: "center", testcase.failure['@message'].toString().replace("[","").replace("]","").split("More info")[0])
+                                                    td(class: "center") {
+                                                        a(href: "#", testcase.'system-out'.text())
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            footer(class: "page-footer blue darken-3") {
+                div(class: "footer-copyright") {
+                    div(class: "container", "Demo By - rookieInTraining") {
+                        a(class: "grey-text text-lighten-4 right", "")
+                    }
+                }
+            }
+            script(type: "text/javascript", src: "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js") { mkp.yield("") }
+        }
+    }
+}
+
+resultGenerator.dependsOn htmlReport
