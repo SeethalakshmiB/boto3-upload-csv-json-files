@@ -28,32 +28,32 @@
     // containers: [
     //                 containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:latest')
     //                 ]) {
-        podTemplate( label: 'jnlp', containers: [
-            containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent:4.3-4-alpine')]
-        )  {
-    node('jnlp') {
-        stage('build a go project') {
-            // container('jnlp') {
-                stage('Build a go project') {
-                    sh 'echo hello'
-                }
-            // }
+    //     podTemplate( label: 'jnlp', containers: [
+    //         containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent:4.3-4-alpine')]
+    //     )  {
+    // node('jnlp') {
+    //     stage('build a go project') {
+    //         // container('jnlp') {
+    //             stage('Build a go project') {
+    //                 sh 'echo hello'
+    //             }
+    //         // }
+    //     }
+    node {
+        stage('Checkout') {
+            // sh "mvn"
+                        // container('build') {
+            // sh "hello from the container $POD_CONTAINER"
+            // sh "aws s3 ls"
+            // disable to recycle workspace data to save time/bandwidth
+            deleteDir()
+            checkout scm
+                        // }
+            //enable for commit id in build number
+            //env.git_commit_id = sh returnStdout: true, script: 'git rev-parse HEAD'
+            //env.git_commit_id_short = env.git_commit_id.take(7)
+            //currentBuild.displayName = "#${currentBuild.number}-${env.git_commit_id_short}"
         }
-    // node {
-        // stage('Checkout') {
-        //     // sh "mvn"
-        //                 // container('build') {
-        //     sh "hello from the container $POD_CONTAINER"
-        //     // sh "aws s3 ls"
-        //     // disable to recycle workspace data to save time/bandwidth
-        //     deleteDir()
-        //     checkout scm
-        //                 // }
-        //     //enable for commit id in build number
-        //     //env.git_commit_id = sh returnStdout: true, script: 'git rev-parse HEAD'
-        //     //env.git_commit_id_short = env.git_commit_id.take(7)
-        //     //currentBuild.displayName = "#${currentBuild.number}-${env.git_commit_id_short}"
-        // }
         // stage('Install') {
         //                 // container('build') {
         //     sh 'npm install'
@@ -81,4 +81,4 @@
 // }
 
   }
-}
+// }
