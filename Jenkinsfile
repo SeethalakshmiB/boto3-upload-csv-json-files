@@ -48,6 +48,8 @@
             // disable to recycle workspace data to save time/bandwidth
             deleteDir()
             checkout scm
+
+            junit 'demo.xml'
                         // }
             //enable for commit id in build number
             //env.git_commit_id = sh returnStdout: true, script: 'git rev-parse HEAD'
