@@ -49,7 +49,7 @@
             deleteDir()
             checkout scm
 
-            ./gradlew clean resultGenerator
+            sh "./gradlew clean resultGenerator"
 
             // junit 'demo.xml'
             publishHTML (target : [allowMissing: false,
