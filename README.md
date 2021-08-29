@@ -1,1 +1,1 @@
-# gradle-junit-demo
+# Example python code for uploading json and csv files
